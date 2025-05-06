@@ -156,6 +156,8 @@
                 }),
                 success: function(response) {
                     alert('Đăng ký thành công!');
+                    // Chuyển hướng đến trang chúc mừng
+                    window.location.href = 'http://localhost:3000';  // Điều hướng đến trang welcome.html
                 },
                 error: function(error) {
                     alert('Đã có lỗi xảy ra!');

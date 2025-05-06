@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Quản Lý Người Dùng</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"/>
+  <!-- DataTables CSS -->
+  <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bs-primary: #ff7f50;
+    }
+    body { background: #f4f4f4; }
+    .table-responsive { margin-top: 1rem; }
+    .modal-header { background: var(--bs-primary); color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h1 class="text-center mb-4" style="color: var(--bs-primary)">🛒 Quản Lý Người Dùng</h1>
+    <div class="table-responsive">
+      <table id="userTable" class="table table-striped table-bordered w-100">
+        <thead class="table-primary">
+          <tr>
+            <th>ID</th><th>Họ & Tên</th><th>SĐT</th><th>Giới Tính</th>
+            <th>Avatar</th><th>Loại</th><th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Cập nhật -->
+  <div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Cập Nhật Người Dùng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="updateForm" class="p-3">
+          <input type="hidden" id="editUserID"/>
+          <div class="mb-3">
+            <label class="form-label">Họ & Tên</label>
+            <input id="editFullName" class="form-control" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Số Điện Thoại</label>
+            <input id="editPhoneNumber" class="form-control" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Giới Tính</label>
+            <select id="editGender" class="form-select">
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Avatar URL</label>
+            <input id="editAvatarUrl" class="form-control"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Loại Người Dùng</label>
+            <select id="editUserType" class="form-select">
+              <option value="KhachHang">Khách Hàng</option>
+              <option value="ChuCuaHang">Chủ Cửa Hàng</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Lưu Thay Đổi</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS: jQuery, Bootstrap, DataTables, SweetAlert2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    const API = 'http://localhost:3000/api/users';
+
+    // 1. Hiển thị danh sách
+    async function fetchUsers() {
+      try {
+        const res = await fetch(`${API}/get_users`);
+        const users = await res.json();
+        const table = $('#userTable').DataTable({ destroy: true });
+        table.clear();
+        users.forEach(u => {
+          table.row.add([
+            u.UserID,
+            u.FullName,
+            u.PhoneNumber,
+            u.Gender,
+            `<img src="${u.AvatarUrl}" width="50">`,
+            u.IsChuCuaHang ? 'Chủ Cửa Hàng' : 'Khách Hàng',
+            `<button class="btn btn-warning btn-sm me-1" onclick="editUser(${u.UserID})">
+               <i class="fa fa-edit"></i>
+             </button>
+             <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.UserID})">
+               <i class="fa fa-trash"></i>
+             </button>`
+          ]);
+        });
+        table.draw();
+      } catch {
+        Swal.fire('Lỗi','Không thể tải danh sách!','error');
+      }
+    }
+
+    // 2. Mở modal và load user
+    async function editUser(id) {
+      try {
+        const res  = await fetch(`${API}/${id}`);
+        const u    = await res.json();
+        $('#editUserID').val(u.UserID);
+        $('#editFullName').val(u.FullName);
+        $('#editPhoneNumber').val(u.PhoneNumber);
+        $('#editGender').val(u.Gender);
+        $('#editAvatarUrl').val(u.AvatarUrl);
+        $('#editUserType').val(u.IsChuCuaHang ? 'ChuCuaHang' : 'KhachHang');
+        new bootstrap.Modal('#updateModal').show();
+      } catch {
+        Swal.fire('Lỗi','Không lấy được thông tin user!','error');
+      }
+    }
+
+    // 3. Xử lý submit cập nhật
+    $('#updateForm').on('submit', async function(e) {
+      e.preventDefault();
+      const payload = {
+        userID:      $('#editUserID').val(),
+        fullName:    $('#editFullName').val(),
+        phoneNumber: $('#editPhoneNumber').val(),
+        gender:      $('#editGender').val(),
+        avatarUrl:   $('#editAvatarUrl').val(),
+        userType:    $('#editUserType').val()
+      };
+      try {
+        await fetch(`${API}/update`, {
+          method: 'PUT',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        Swal.fire('Thành công','Cập nhật thành công!','success');
+        fetchUsers();
+      } catch {
+        Swal.fire('Lỗi','Cập nhật thất bại!','error');
+      }
+      bootstrap.Modal.getInstance($('#updateModal')).hide();
+    });
+
+    // 4. Xóa user
+    async function deleteUser(id) {
+      const r = await Swal.fire({
+        title: 'Xác nhận',
+        text: 'Bạn có chắc muốn xóa?',
+        icon: 'warning',
+        showCancelButton: true
+      });
+      if (!r.isConfirmed) return;
+      try {
+        await fetch(`${API}/delete`, {
+          method: 'DELETE',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ userID: id })
+        });
+        Swal.fire('Đã xóa!','User đã bị xóa.','success');
+        fetchUsers();
+      } catch {
+        Swal.fire('Lỗi','Xóa thất bại!','error');
+      }
+    }
+
+    // load khi ready
+    $(document).ready(function(){
+      $('#userTable').DataTable();
+      fetchUsers();
+    });
+  </script>
+</body>
+</html>

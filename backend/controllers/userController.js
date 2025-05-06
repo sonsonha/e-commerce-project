@@ -33,8 +33,37 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// Lấy danh sách người dùng
+const getUsers = async (req, res) => {
+    try {
+        const users = await userModel.getUsers();
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ message: 'Error occurred while fetching users.' });
+    }
+};
+
+const getUser = async (req, res) => {
+    const userID = parseInt(req.params.id, 10);
+    if (isNaN(userID)) {
+      return res.status(400).json({ message: 'Invalid userID' });
+    }
+    try {
+      const user = await userModel.getUserById(userID);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json(user);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error occurred while fetching user.' });
+    }
+  };
+
 module.exports = {
     registerUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUsers,
+    getUser
 };

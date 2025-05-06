@@ -51,6 +51,8 @@ app.use('/api/users', userRoutes);
 //     }
 // });
 
+app.use(express.json());
+
 
 // Lắng nghe server
 const PORT = process.env.PORT || 3000;

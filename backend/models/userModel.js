@@ -52,8 +52,44 @@ const deleteUser = async (userID) => {
     }
 };
 
+// Hàm lấy danh sách người dùng
+// const getUsers = async () => {
+//     try {
+//         const pool = await sql.connect(config);
+//         const result = await pool.request()
+//             .query('SELECT UserID, FullName, PhoneNumber, Gender, AvatarUrl, IsChuCuaHang FROM NguoiDung');
+//         return result; // Trả về danh sách người dùng dưới dạng recordset
+//     } catch (err) {
+//         throw new Error('Error in database operation: ' + err.message);
+//     }
+// };
+
+const getUsers = async () => {
+    const pool = await sql.connect(config);
+    const result = await pool
+      .request()
+      .query('SELECT UserID, FullName, PhoneNumber, Gender, AvatarUrl, IsChuCuaHang FROM NguoiDung');
+    return result.recordset;    // <-- return *just* the array
+  }
+
+  const getUserById = async (userID) => {
+    const pool = await sql.connect(config);
+    const result = await pool
+      .request()
+      .input('UserID', sql.Int, userID)
+      .query(`
+        SELECT UserID, FullName, PhoneNumber, Gender, AvatarUrl, IsChuCuaHang
+        FROM NguoiDung
+        WHERE UserID = @UserID
+      `);
+    return result.recordset[0] || null;  // trả về object hoặc null nếu không tìm thấy
+  };
+  
+
 module.exports = {
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUsers,
+    getUserById
 };
