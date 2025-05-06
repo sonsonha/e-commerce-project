@@ -144,11 +144,10 @@
 
             // Gửi dữ liệu đến API để thực thi thủ tục
             $.ajax({
-                url: '/api/register',  // Địa chỉ API của bạn
+                url: 'http://localhost:3000/api/users/register',  // Đảm bảo URL khớp với backend
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    action: 'INSERT',
                     fullName: fullName,
                     phoneNumber: phoneNumber,
                     gender: gender,
@@ -162,9 +161,11 @@
                     alert('Đã có lỗi xảy ra!');
                 }
             });
+
         });
     });
 </script>
+
 
 </body>
 </html>

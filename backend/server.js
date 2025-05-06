@@ -33,6 +33,25 @@ sql.connect(config)
 // Sử dụng routes cho người dùng
 app.use('/api/users', userRoutes);
 
+// app.post('/register', async (req, res) => {
+//     try {
+//         const { fullName, phoneNumber, gender, avatarUrl, userType } = req.body;
+//         const pool = await sql.connect(config);
+//         await pool.request()
+//             .input('FullName', sql.NVarChar, fullName)
+//             .input('PhoneNumber', sql.Varchar, phoneNumber)
+//             .input('Gender', sql.NVarChar, gender)
+//             .input('AvatarUrl', sql.NVarChar, avatarUrl)
+//             .input('UserType', sql.NVarChar, userType)
+//             .execute('QuanLyNguoiDung');  // Gọi thủ tục QuanLyNguoiDung
+//         res.status(200).send('Đăng ký thành công');
+//     } catch (err) {
+//         console.error('Error during registration:', err); // Log lỗi
+//         res.status(500).send('Đã có lỗi xảy ra khi đăng ký');
+//     }
+// });
+
+
 // Lắng nghe server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
