@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Quản Lý Loại Sản Phẩm</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"/>
+  <!-- DataTables CSS -->
+  <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bs-primary: #ff7f50;
+    }
+    body { background: #f4f4f4; }
+    .table-responsive { margin-top: 1rem; }
+    .modal-header { background: var(--bs-primary); color: #fff; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ff7f50;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">E-Commerce</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/sign-up.html">Sign Up</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/manage-user.html">Manage Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/variant.html">Manage Variants</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container py-4">
+    <h1 class="text-center mb-4" style="color: var(--bs-primary)">🛒 Quản Lý Loại Sản Phẩm</h1>
+    <div class="table-responsive">
+      <table id="catTable" class="table table-striped table-bordered w-100">
+        <thead class="table-primary">
+          <tr>
+            <th>ID</th><th>Tên loại</th><th>Mô tả</th><th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <!-- Nút Thêm Loại -->
+    <button id="addBtn" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#categoryModal">
+      Thêm Loại
+    </button>
+  </div>
+
+  <!-- Modal Thêm/Sửa -->
+  <div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Thêm / Cập nhật Loại</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="catForm" class="p-3 needs-validation" novalidate>
+          <input type="hidden" id="catID"/>
+          <div class="mb-3">
+            <label class="form-label">Tên loại</label>
+            <input type="text" class="form-control" id="catName" required/>
+            <div class="invalid-feedback">Vui lòng nhập tên loại.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" id="catDesc"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Lưu</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thông Báo Thành Công -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="successModalLabel">Thành công!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="successMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS: jQuery, Bootstrap, DataTables, SweetAlert2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    let table;
+    function loadTable() {
+      $.get('http://localhost:3000/api/categories/')
+        .done(data => {
+          table.clear();
+          data.forEach(cat => {
+            table.row.add([  
+              cat.CategoryID,
+              cat.CategoryName,
+              cat.Description,
+              `<button class="btn btn-warning btn-sm me-1 editBtn" data-id="${cat.CategoryID}">Sửa</button>
+               <button class="btn btn-danger btn-sm delBtn" data-id="${cat.CategoryID}">Xóa</button>` 
+            ]);
+          });
+          table.draw();
+        })
+        .fail(() => alert('Không tải được dữ liệu!'));
+    }
+
+    $(document).ready(function() {
+      // Khởi tạo DataTable
+      table = $('#catTable').DataTable({
+        columns: [
+          { title: "ID" },
+          { title: "Tên loại" },
+          { title: "Mô tả" },
+          { title: "Hành động", orderable: false }
+        ],
+        language: {
+          search: "Tìm kiếm:",
+          lengthMenu: "Hiện _MENU_ bản ghi"
+        }
+      });
+      loadTable();
+
+      // Nút Thêm
+      $('#addBtn').click(() => {
+        $('#catForm')[0].reset();
+        $('#catID').val('');
+      });
+
+      // Nút Sửa
+      $('#catTable tbody').on('click', '.editBtn', function() {
+        const id = $(this).data('id');
+        $.get(`http://localhost:3000/api/categories/${id}`)
+          .done(cat => {
+            $('#catID').val(cat.CategoryID);
+            $('#catName').val(cat.CategoryName);
+            $('#catDesc').val(cat.Description);
+            new bootstrap.Modal($('#categoryModal')).show();
+          })
+          .fail(() => alert('Lỗi khi lấy thông tin loại.'));
+      });
+
+      // Nút Xóa
+      $('#catTable tbody').on('click', '.delBtn', function() {
+        if (!confirm('Bạn có chắc chắn muốn xóa?')) return;
+        const id = $(this).data('id');
+        $.ajax({
+          url: 'http://localhost:3000/api/categories/delete',
+          method: 'DELETE',
+          contentType: 'application/json',
+          data: JSON.stringify({ categoryID: id })
+        })
+        .done(() => {
+          loadTable();
+          $('#successMessage').text('Xóa loại sản phẩm thành công!');
+          new bootstrap.Modal($('#successModal')).show();
+        })
+        .fail(xhr => alert(xhr.responseJSON.message || 'Lỗi khi xóa.'));
+      });
+
+      // Submit form Thêm/Sửa
+      $('#catForm').on('submit', function(e) {
+        e.preventDefault();
+        if (!this.checkValidity()) return $(this).addClass('was-validated');
+        const id = $('#catID').val();
+        const payload = {
+          categoryName: $('#catName').val(),
+          description: $('#catDesc').val()
+        };
+        let url = 'http://localhost:3000/api/categories/create', method = 'POST';
+        if (id) {
+          url = 'http://localhost:3000/api/categories/update';
+          method = 'PUT';
+          payload.categoryID = +id;
+        }
+        $.ajax({
+          url, method,
+          contentType: 'application/json',
+          data: JSON.stringify(payload)
+        })
+        .done(() => {
+          $('#categoryModal').modal('hide');
+          loadTable();
+          $('#successMessage').text('Lưu loại sản phẩm thành công!');
+          new bootstrap.Modal($('#successModal')).show();
+        })
+        .fail(xhr => alert(xhr.responseJSON.message || 'Lỗi khi lưu.'));
+      });
+    });
+  </script>
+</body>
+</html>

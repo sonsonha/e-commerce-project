@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản Lý Biến Thể</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"/>
+  <!-- DataTables CSS -->
+  <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+  <style>
+    :root { --bs-primary: #ff7f50; }
+    body { background: #f4f4f4; }
+    .table-responsive { margin-top: 1rem; }
+    .modal-header { background: var(--bs-primary); color: #fff; }
+    .filter-section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ff7f50;">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">E-Commerce</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="http://127.0.0.1:5500/frontend/sign-up.html">Sign Up</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="http://127.0.0.1:5500/frontend/manage-user.html">Manage Users</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="http://127.0.0.1:5500/frontend/variant.html">Manage Variants</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+  <div class="container py-4">
+    <h1 class="text-center mb-4" style="color: var(--bs-primary)">🛒 Quản Lý Biến Thể</h1>
+
+    <!-- Lọc theo tên sản phẩm -->
+    <div class="filter-section">
+      <label for="productNameFilter">Tên Sản Phẩm: </label>
+      <input id="productNameFilter" type="text" class="form-control d-inline-block w-50" placeholder="Tìm sản phẩm..." />
+      <button id="filterProduct" class="btn btn-primary ms-2">Lọc</button>
+    </div>
+
+    <!-- Lọc theo giá -->
+    <div class="filter-section">
+      <label for="priceMin">Giá từ: </label>
+      <input id="priceMin" type="number" class="form-control d-inline-block w-25" placeholder="Từ" />
+      <label for="priceMax" class="ms-2">Đến: </label>
+      <input id="priceMax" type="number" class="form-control d-inline-block w-25" placeholder="Đến" />
+      <button id="filterPrice" class="btn btn-primary ms-2">Lọc</button>
+    </div>
+
+    <div class="table-responsive">
+      <button id="addVariantBtn" class="btn btn-success mb-3">Thêm Biến Thể</button>
+      <table id="variantTable" class="table table-striped table-bordered w-100">
+        <thead class="table-primary">
+          <tr>
+            <th>VariantID</th><th>ProductID</th><th>ProductName</th><th>Name</th><th>Price</th><th>StockQuantity</th><th>Attribute</th><th>Value</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Cập nhật -->
+<!-- Modal Cập nhật Biến Thể -->
+<div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Cập Nhật Biến Thể</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="updateForm" class="p-3">
+          <input type="hidden" id="editVariantID" />
+          <div class="mb-3">
+            <label class="form-label">Product</label>
+            <select id="editProductID" class="form-select" required>
+              <!-- Options dynamically populated -->
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input id="editName" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Price</label>
+            <input id="editPrice" type="number" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Stock Quantity</label>
+            <input id="editStockQuantity" type="number" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Attribute</label>
+            <input id="editAttribute" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input id="editValue" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thêm Biến Thể -->
+  <div class="modal fade" id="addVariantModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Thêm Biến Thể</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="addVariantForm" class="p-3">
+          <div class="mb-3">
+            <label class="form-label">ProductID</label>
+            <select id="addProductID" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input id="addName" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Price</label>
+            <input id="addPrice" type="number" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Stock Quantity</label>
+            <input id="addStockQuantity" type="number" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Attribute</label>
+            <input id="addAttribute" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input id="addValue" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Add Variant</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS: jQuery, Bootstrap, DataTables, SweetAlert2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    const API = 'http://localhost:3000/api/variants';
+
+    // Lấy danh sách sản phẩm để thêm vào select
+    // async function fetchProducts() {
+    //   try {
+    //     const res = await $.ajax({
+    //       url: 'http://localhost:3000/api/products', // Đảm bảo API này trả về danh sách sản phẩm
+    //       method: 'GET',
+    //       success: function(response) {
+    //         const productSelect = $('#editProductID, #addProductID');
+    //         productSelect.empty();
+    //         response.forEach(product => {
+    //           productSelect.append(`<option value="${product.ProductID}">${product.Name}</option>`);
+    //         });
+    //       },
+    //       error: function(error) {
+    //         Swal.fire('Error', 'Could not load products.', 'error');
+    //       }
+    //     });
+    //   } catch {
+    //     Swal.fire('Error', 'Error fetching products data.', 'error');
+    //   }
+    // }
+
+    // Lấy danh sách sản phẩm để thêm vào select
+    async function fetchProducts() {
+        try {
+            const res = await $.ajax({
+                url: 'http://localhost:3000/api/products', // Đảm bảo API này trả về danh sách sản phẩm
+                method: 'GET',
+                success: function(response) {
+                    const productSelect = $('#editProductID, #addProductID');
+                    productSelect.empty();  // Xóa các option cũ
+                    response.forEach(product => {
+                        productSelect.append(`<option value="${product.ProductID}">${product.ProductName}</option>`);
+                    });
+                },
+                error: function(error) {
+                    Swal.fire('Error', 'Could not load products.', 'error');
+                }
+            });
+        } catch {
+            Swal.fire('Error', 'Error fetching products data.', 'error');
+        }
+    }
+
+// Mở modal thêm biến thể và đảm bảo fetchProducts chạy xong trước khi mở modal
+$('#addVariantBtn').click(async function() {
+    await fetchProducts();  // Đảm bảo fetchProducts chạy xong
+    $('#addVariantModal').modal('show');  // Mở modal sau khi dữ liệu được tải
+});
+
+
+    // 1. Hiển thị danh sách biến thể
+    async function fetchVariants(minPrice = 0, maxPrice = 9999999, productName = '') {
+      try {
+        const res = await $.ajax({
+          url: `${API}`, // Lấy tất cả biến thể
+          method: 'GET',
+          success: function(response) {
+            const table = $('#variantTable').DataTable({ destroy: true });
+            table.clear();
+            response.forEach(v => {
+              if (v.Price >= minPrice && v.Price <= maxPrice && v.Name.toLowerCase().includes(productName.toLowerCase())) {
+                table.row.add([
+                  v.VariantID,
+                  v.ProductID,
+                  v.ProductName, // Hiển thị tên sản phẩm
+                  v.Name,
+                  v.Price,
+                  v.StockQuantity,
+                  v.Attribute,
+                  v.Value,
+                  `<button class="btn btn-warning btn-sm me-1" onclick="editVariant(${v.VariantID})"><i class="fa fa-edit"></i></button>
+                   <button class="btn btn-danger btn-sm" onclick="deleteVariant(${v.VariantID})"><i class="fa fa-trash"></i></button>`
+                ]);
+              }
+            });
+            table.draw();
+          },
+          error: function(error) {
+            Swal.fire('Error', 'Could not load variants.', 'error');
+          }
+        });
+      } catch {
+        Swal.fire('Error', 'Error fetching variants data.', 'error');
+      }
+    }
+
+    // Mở modal thêm biến thể
+    // $('#addVariantBtn').click(function() {
+    //     fetchProducts(); // Gọi fetchProducts trước khi mở modal
+    //   $('#addVariantModal').modal('show');
+    // });
+
+    $('#addVariantBtn').click(async function() {
+        await fetchProducts();  // Đảm bảo fetchProducts chạy xong
+        $('#addVariantModal').modal('show');  // Mở modal sau khi dữ liệu được tải
+    });
+
+    // 2. Mở modal và lấy variant
+    function editVariant(id) {
+      $.ajax({
+        url: `${API}/${id}`,
+        method: 'GET',
+        success: function(v) {
+          $('#editVariantID').val(v.VariantID);
+          $('#editProductID').val(v.ProductID);
+          $('#editName').val(v.Name);
+          $('#editPrice').val(v.Price);
+          $('#editStockQuantity').val(v.StockQuantity);
+          $('#editAttribute').val(v.Attribute);
+          $('#editValue').val(v.Value);
+          $('#updateModal').modal('show');
+        },
+        error: function(error) {
+          Swal.fire('Error', 'Could not fetch variant data.', 'error');
+        }
+      });
+    }
+
+    // 3. Xử lý submit thêm biến thể
+    $('#addVariantForm').on('submit', function(e) {
+      e.preventDefault();
+      const payload = {
+        productID: $('#addProductID').val(),
+        name: $('#addName').val(),
+        price: $('#addPrice').val(),
+        stockQuantity: $('#addStockQuantity').val(),
+        attribute: $('#addAttribute').val(),
+        value: $('#addValue').val()
+      };
+      $.ajax({
+        url: `${API}/create`, // API để thêm mới biến thể
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function(response) {
+          Swal.fire('Success', 'Variant added successfully!', 'success');
+          fetchVariants();
+        },
+        error: function(error) {
+          Swal.fire('Error', 'Add variant failed!', 'error');
+        }
+      });
+      $('#addVariantModal').modal('hide');
+    });
+
+    // 4. Xóa variant
+    function deleteVariant(id) {
+      Swal.fire({
+        title: 'Confirm',
+        text: 'Are you sure you want to delete this variant?',
+        icon: 'warning',
+        showCancelButton: true
+      }).then(result => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `${API}/delete`,  // Xóa variant
+            method: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ variantID: id }),
+            success: function(response) {
+              Swal.fire('Deleted', 'Variant deleted successfully!', 'success');
+              fetchVariants();
+            },
+            error: function(error) {
+              Swal.fire('Error', 'Delete failed!', 'error');
+            }
+          });
+        }
+      });
+    }
+
+    // Lọc theo giá
+    $('#filterPrice').click(function() {
+      const minPrice = $('#priceMin').val() || 0;
+      const maxPrice = $('#priceMax').val() || 9999999;
+      fetchVariants(minPrice, maxPrice);
+    });
+
+    // Lọc theo tên sản phẩm
+    $('#filterProduct').click(function() {
+      const productName = $('#productNameFilter').val();
+      fetchVariants(0, 9999999, productName);
+    });
+
+    // Gọi hàm fetchVariants để tải dữ liệu ban đầu khi trang được load
+    $(document).ready(function() {
+      fetchVariants();
+    });
+    fetchProducts();
+  </script>
+</body>
+</html>

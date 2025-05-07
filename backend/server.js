@@ -1,7 +1,11 @@
 const express = require('express');
 const sql = require('mssql');
 const cors = require('cors');
+// const config  = require('./config/config');
 const userRoutes = require('./routes/userRoutes'); // Import routes
+const variantRoutes = require('./routes/variantRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const productRoutes = require('./routes/productRoutes');  
 
 const app = express();
 app.use(cors());
@@ -32,24 +36,9 @@ sql.connect(config)
 
 // Sử dụng routes cho người dùng
 app.use('/api/users', userRoutes);
-
-// app.post('/register', async (req, res) => {
-//     try {
-//         const { fullName, phoneNumber, gender, avatarUrl, userType } = req.body;
-//         const pool = await sql.connect(config);
-//         await pool.request()
-//             .input('FullName', sql.NVarChar, fullName)
-//             .input('PhoneNumber', sql.Varchar, phoneNumber)
-//             .input('Gender', sql.NVarChar, gender)
-//             .input('AvatarUrl', sql.NVarChar, avatarUrl)
-//             .input('UserType', sql.NVarChar, userType)
-//             .execute('QuanLyNguoiDung');  // Gọi thủ tục QuanLyNguoiDung
-//         res.status(200).send('Đăng ký thành công');
-//     } catch (err) {
-//         console.error('Error during registration:', err); // Log lỗi
-//         res.status(500).send('Đã có lỗi xảy ra khi đăng ký');
-//     }
-// });
+app.use('/api/categories', categoryRoutes);
+app.use('/api/variants', variantRoutes);
+app.use('/api/products', productRoutes);  // Sử dụng routes cho sản phẩm
 
 app.use(express.json());
 

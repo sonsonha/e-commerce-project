@@ -1,30 +1,20 @@
 const Product = require('../models/productModel');
 
-// Create a new product
-const createProduct = async (req, res) => {
-  const { name, description, price, stock, imageUrl } = req.body;
-  try {
-    const product = await Product.create({ name, description, price, stock, imageUrl });
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(400).json({ error: 'Failed to create product' });
-  }
-};
-
-// Get all products
+// Lấy tất cả sản phẩm
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll();
+    const products = await Product.getProducts();  // Gọi từ model
     res.status(200).json(products);
   } catch (error) {
     res.status(400).json({ error: 'Failed to fetch products' });
   }
 };
 
-// Get a single product
+// Lấy một sản phẩm theo ID
 const getProductById = async (req, res) => {
+  const productID = req.params.id;
   try {
-    const product = await Product.findByPk(req.params.id);
+    const product = await Product.getProductById(productID);  // Gọi từ model
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -34,4 +24,15 @@ const getProductById = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById };
+// Tạo một sản phẩm mới
+const createProduct = async (req, res) => {
+  const { productName, description } = req.body;
+  try {
+    await Product.createProduct(productName, description);  // Gọi từ model
+    res.status(201).json({ message: 'Product created successfully!' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create product' });
+  }
+};
+
+module.exports = { getAllProducts, getProductById, createProduct };

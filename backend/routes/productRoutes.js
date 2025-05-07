@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { createProduct, getAllProducts, getProductById } = require('../controllers/productController');
+const productController = require('../controllers/productController');
 
-router.post('/', createProduct);         // Add a new product
-router.get('/', getAllProducts);         // Get all products
-router.get('/:id', getProductById);      // Get product by ID
+// Route để lấy danh sách sản phẩm
+router.get('/', productController.getAllProducts);
+
+// Route để lấy sản phẩm theo ID
+router.get('/:id', productController.getProductById);
+
+// Route để tạo sản phẩm mới (nếu có)
+// router.post('/', productController.createProduct);
 
 module.exports = router;

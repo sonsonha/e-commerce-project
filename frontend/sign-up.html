@@ -72,7 +72,27 @@
     </style>
 </head>
 <body>
-
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ff7f50;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">E-Commerce</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/sign-up.html">Sign Up</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/manage-user.html">Manage Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://127.0.0.1:5500/frontend/variant.html">Manage Variants</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 <div class="row m-0">
     <!-- Phần bên trái -->
     <div class="col-md-6 left-side">
@@ -144,7 +164,7 @@
 
             // Gửi dữ liệu đến API để thực thi thủ tục
             $.ajax({
-                url: 'http://localhost:3000/api/users/register',  // Đảm bảo URL khớp với backend
+                url: 'http://localhost:3000/api/users/register',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
@@ -157,7 +177,6 @@
                 success: function(response) {
                     alert('Đăng ký thành công!');
                     // Chuyển hướng đến trang chúc mừng
-                    window.location.href = 'http://localhost:3000';  // Điều hướng đến trang welcome.html
                 },
                 error: function(error) {
                     alert('Đã có lỗi xảy ra!');
